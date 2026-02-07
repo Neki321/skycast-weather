@@ -22,16 +22,15 @@ export const fetchForecast = async (city: string): Promise<IForecast[]> => {
   const response = await axios.get(`${BASE_URL}/data/2.5/forecast`, {
     params: { q: city, units: 'metric', appid: API_KEY, lang: 'ua' },
   });
-  return response.data.list.filter((_: any, index: number) => index % 8 === 0);
+  return response.data.list;
 };
 
 export const fetchForecastByCoords = async (lat: number, lon: number): Promise<IForecast[]> => {
   const response = await axios.get(`${BASE_URL}/data/2.5/forecast`, {
     params: { lat, lon, units: 'metric', appid: API_KEY, lang: 'ua' },
   });
-  return response.data.list.filter((_: any, index: number) => index % 8 === 0);
+  return response.data.list;
 };
-
 export const fetchCitySuggestions = async (query: string): Promise<ICitySuggestion[]> => {
   if (query.length < 3) return [];
   const response = await axios.get<ICitySuggestion[]>(`${BASE_URL}/geo/1.0/direct`, {
