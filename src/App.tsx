@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MapPin, ChevronLeft } from 'lucide-react'; // Видалили CloudRain, бо він не використовувався
+import { MapPin, ChevronLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchWeather, fetchForecast, fetchWeatherByCoords, fetchForecastByCoords } from './services/weatherService';
 import { SearchForm } from './components/SearchForm';
@@ -21,25 +21,36 @@ function App() {
     const savedCity = localStorage.getItem('last_city');
     if (savedCity) handleSearch(savedCity);
 
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      const { latitude, longitude } = pos.coords;
-      setIsLoading(true);
-      try {
-        const [weatherData, forecastData] = await Promise.all([
-          fetchWeatherByCoords(latitude, longitude),
-          fetchForecastByCoords(latitude, longitude)
-        ]);
-        
-        setCurrentWeather(weatherData);
-        setActiveWeather(weatherData);
-        setFullList(forecastData);
-        setForecast(forecastData.filter((_: any, i: number) => i % 8 === 0));
-      } catch {
-        if (!savedCity) setError('Помилка геолокації');
-      } finally {
-        setIsLoading(false);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude, longitude } = pos.coords;
+        setIsLoading(true);
+        try {
+          const [weatherData, forecastData] = await Promise.all([
+            fetchWeatherByCoords(latitude, longitude),
+            fetchForecastByCoords(latitude, longitude)
+          ]);
+          
+          setCurrentWeather(weatherData);
+          setActiveWeather(weatherData);
+          setFullList(forecastData);
+          setForecast(forecastData.filter((_: any, i: number) => i % 8 === 0));
+        } catch {
+          if (!savedCity) setError('Помилка завантаження даних для вашої локації');
+        } finally {
+          setIsLoading(false);
+        }
+      },
+      (err) => {
+        console.warn(`Geolocation error (${err.code}): ${err.message}`);
+        if (!savedCity) setError('Доступ до локації відхилено або недоступний');
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 7000,
+        maximumAge: 0
       }
-    });
+    );
   }, []);
 
   const handleSearch = async (city: string) => {
@@ -52,8 +63,8 @@ function App() {
       ]);
       setCurrentWeather(weatherData);
       setActiveWeather(weatherData);
-      setFullList(forecastData); // ВИПРАВЛЕНО: прибрали .list
-      setForecast(forecastData.filter((_: any, i: number) => i % 8 === 0)); // ВИПРАВЛЕНО: прибрали .list
+      setFullList(forecastData);
+      setForecast(forecastData.filter((_: any, i: number) => i % 8 === 0));
       localStorage.setItem('last_city', city);
     } catch {
       setError('Місто не знайдено');
@@ -85,7 +96,7 @@ function App() {
             <motion.div key="loader" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center py-20 italic opacity-50">
               Аналізуємо атмосферу...
             </motion.div>
-          ) : error ? ( // ТЕПЕР ВИКОРИСТОВУЄМО error ТУТ
+          ) : error ? (
             <motion.div key="error" className="bg-red-500/20 text-red-100 p-4 rounded-2xl text-center mb-4 border border-red-500/30 text-sm font-medium">
               {error}
             </motion.div>

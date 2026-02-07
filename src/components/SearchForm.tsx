@@ -55,7 +55,7 @@ export const SearchForm = ({ onSearch }: SearchFormProps) => {
       </form>
 
       {suggestions.length > 0 && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white/10 backdrop-blur-2xl border border-white/20 rounded-2xl overflow-hidden z-50 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-300">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white/10 backdrop-blur-2xl border border-white/20 rounded-2xl overflow-y-auto max-h-60 z-50 shadow-2xl animate-in fade-in slide-in-from-top-2 duration-300 scrollbar-hide">
           {suggestions.map((s, index) => (
             <div
               key={index}
